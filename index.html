@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bluefish &amp; Albie Trip Planner</title>
+<meta name="theme-color" content="#14293A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>Bluefish &amp; Albie Trip Planner</h1>
+  <div class="coords">RARITAN BAY TO MONTAUK &nbsp;·&nbsp; SHORE / PARTY BOAT / CAMP / CHARTER</div>
+</header>
+
+<p class="notice" id="status">Loading live data…</p>
+
+<div class="grid">
+<aside class="controls">
+  <section class="panel">
+    <h2>Your trip</h2>
+    <div class="row">
+      <div class="field"><label for="d1">From</label><input type="date" id="d1"></div>
+      <div class="field"><label for="d2">To</label><input type="date" id="d2"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="early">Leave home after</label><input type="time" id="early" value="05:00"></div>
+      <div class="field"><label for="late">Be home by</label><input type="time" id="late" value="20:00"></div>
+    </div>
+    <label class="check"><input type="checkbox" id="after"> Home after midnight is fine (night boats)</label>
+    <div class="row" style="margin-top:8px">
+      <div class="field"><label for="sess">Shore session</label>
+        <select id="sess"><option value="120">2 hours</option><option value="180" selected>3 hours</option><option value="240">4 hours</option><option value="300">5 hours</option></select></div>
+      <div class="field"><label for="maxd">Max drive, one way</label>
+        <select id="maxd"><option value="90">1.5 hours</option><option value="120">2 hours</option><option value="150">2.5 hours</option><option value="180">3 hours</option><option value="210">3.5 hours</option><option value="240" selected>4 hours</option><option value="270">4.5 hours</option></select></div>
+    </div>
+    <div class="field"><label for="maxlen">Longest boat trip</label>
+      <select id="maxlen"><option value="240">4 hours</option><option value="300">5 hours</option><option value="420" selected>7 hours</option><option value="0">Any length</option></select></div>
+    <label class="check"><input type="checkbox" id="kids" checked> Fishing with kids (favor steady action)</label>
+    <label class="check"><input type="checkbox" id="night"> Allow night fishing from shore</label>
+    <label class="check"><input type="checkbox" id="rush"> Add 20% to drive times for traffic</label>
+    <div class="field" style="margin-top:8px"><label for="orig">Starting point</label>
+      <select id="orig"><option value="bergen">Bergen County, NJ</option><option value="custom">Custom coordinates</option></select></div>
+    <div class="row" id="customrow" hidden>
+      <div class="field"><label for="olat">Latitude</label><input type="number" id="olat" step="0.0001" value="40.9445"></div>
+      <div class="field"><label for="olng">Longitude</label><input type="number" id="olng" step="0.0001" value="-73.9963"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Target and how</h2>
+    <label class="check"><input type="checkbox" id="t_blue" checked> Bluefish</label>
+    <label class="check"><input type="checkbox" id="t_albie" checked> False albacore (albies)</label>
+    <div style="height:8px"></div>
+    <label class="check"><input type="checkbox" id="m_shore" checked> Shore spots</label>
+    <label class="check"><input type="checkbox" id="m_party" checked> Party boats</label>
+    <label class="check"><input type="checkbox" id="m_camp" checked> Fishing near my campground</label>
+    <label class="check"><input type="checkbox" id="m_charter"> Charter (last resort)</label>
+    <details>
+      <summary>Show</summary>
+      <div class="field" style="margin-top:6px"><label for="topn">Ranked trips</label>
+        <select id="topn"><option>5</option><option selected>8</option><option>15</option></select></div>
+      <label class="check"><input type="checkbox" id="best" checked> One entry per spot or boat (its best day)</label>
+    </details>
+  </section>
+</aside>
+
+<main class="results">
+  <section class="panel" id="verdict" aria-live="polite"></section>
+
+  <section>
+    <div class="hd"><h2>Best weekend plan</h2><span class="small" id="wkhint"></span></div>
+    <div id="weekend"></div>
+  </section>
+
+  <section>
+    <div class="hd"><h2>Best trips for your schedule</h2><span class="small" id="summary"></span></div>
+    <ol class="cards" id="cards"></ol>
+  </section>
+
+  <section>
+    <div class="hd"><h2>Day by day</h2><span class="small">Score out of 100. A dash means it doesn't fit your drive or schedule.</span></div>
+    <div class="tablewrap"><table id="matrix"></table></div>
+  </section>
+
+  <section class="panel">
+    <h2>Forecast for each day</h2>
+    <p class="small" style="margin-top:0" id="wxnote"></p>
+    <div id="wxrows"></div>
+  </section>
+
+  <section class="panel" id="inboxpanel" hidden>
+    <h2>New reports to read</h2>
+    <p class="small" style="margin-top:0">These links were found automatically. Open one, read it, then log what it says for the spots you care about below. Marking one as read hides it.</p>
+    <div id="inbox"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Log a fresh report</h2>
+    <p class="small" style="margin-top:0">Recent results drive the ranking, and each report loses about a third of its weight every four days. Add what you hear from a boat, a tackle shop or a friend.</p>
+    <div class="row">
+      <div class="field"><label for="rspot">Spot or boat</label><select id="rspot"></select></div>
+      <div class="field"><label for="rdate">Date</label><input type="date" id="rdate"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="rrate">How was the fishing</label>
+        <select id="rrate"><option value="5">5 · Wide open</option><option value="4" selected>4 · Good</option><option value="3">3 · Fair</option><option value="2">2 · Slow</option><option value="1">1 · Skunked</option></select></div>
+      <div class="field"><label for="rnote">Note</label><input type="text" id="rnote" placeholder="Blues to 8 lb on diamond jigs"></div>
+    </div>
+    <button id="radd" type="button">Add report</button>
+    <span class="small" id="rmsg"></span>
+    <div id="rlist" style="margin-top:12px"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Add your campground or another spot</h2>
+    <div class="row">
+      <div class="field"><label for="sname">Name</label><input type="text" id="sname" placeholder="Campground near Barnegat"></div>
+      <div class="field"><label for="stype">Type</label><select id="stype"><option value="camp">Near my campground</option><option value="shore">Shore spot</option></select></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="sreg">Water</label>
+        <select id="sreg"><option value="nj">NJ ocean shore</option><option value="lisouth">Long Island south shore</option><option value="ct">Connecticut shore</option><option value="montauk">Montauk</option></select></div>
+      <div class="field"><label>&nbsp;</label><span class="small">Sets season, odds and tide station</span></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="slat">Latitude</label><input type="number" id="slat" step="0.0001" placeholder="39.7500"></div>
+      <div class="field"><label for="slng">Longitude</label><input type="number" id="slng" step="0.0001" placeholder="-74.1000"></div>
+    </div>
+    <button id="sadd" type="button">Add spot</button> <span class="small" id="smsg"></span>
+  </section>
+
+  <section class="panel">
+    <h2>Rules and season notes</h2>
+    <ul class="reg">
+      <li><b>Bluefish, NJ 2026:</b> 5 per person from shore or a private boat, 7 on a licensed party or charter boat. No size limit, no closed season.</li>
+      <li><b>Black sea bass, NJ:</b> up to 10 fish from Sept 23 to Oct 31 (12.5 in. minimum as of the May forecast). Party boats are likely to run bottom trips now, so call and ask about bluefish.</li>
+      <li><b>Fluke:</b> NJ season closed Sept 25. <b>Tautog:</b> one fish through October.</li>
+      <li><b>Albies:</b> late September into October is prime on the NJ beaches. Eastern Long Island Sound and Montauk usually hold them longer.</li>
+      <li>Albie and bonito rules were not checked for this build. Confirm current regulations before you go.</li>
+    </ul>
+    <details><summary>How scores work</summary>
+      <p class="small">Fish odds combine a seasonal curve for each species in each area with how well each spot suits it. With the kids setting on, odds also reward places that keep rods bent with any species, such as party boats that can switch to bottom fishing. Recent reports are weighted by age and pulled toward neutral when they are old or missing. Tide and light score how much moving water and dawn or dusk your window covers, using NOAA tide predictions for the nearest station. Weather uses the live marine forecast, or the wind and seas you type in. Drive scores drop as travel time approaches your limit. The weights between these factors are built into the model and are not adjustable. Schedule, drive and boat length limits are hard filters. Charters get a 15% penalty. A day is called a no-go when the best trip scores under 55 or the forecast looks rough. Drive times are straight-line estimates scaled for roads, so check the map link before you commit.</p>
+    </details>
+    <details class="src"><summary>Sources</summary>
+      <ul style="padding-left:18px">
+        <li><a href="https://onthewater.com/fishing-reports" target="_blank" rel="noopener">On The Water weekly fishing reports</a></li>
+        <li><a href="https://www.thefisherman.com/" target="_blank" rel="noopener">The Fisherman, NJ and Delaware Bay forecasts</a></li>
+        <li><a href="https://deptest.nj.gov/njfw/?p=65632" target="_blank" rel="noopener">NJ Fish &amp; Wildlife, 2026 bluefish regulations</a></li>
+        <li><a href="https://tidesandcurrents.noaa.gov/" target="_blank" rel="noopener">NOAA CO-OPS tide predictions</a></li>
+        <li><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo weather and marine forecasts</a></li>
+        <li><a href="https://fishingbooker.com/charters/view/4313" target="_blank" rel="noopener">Queen Mary listing</a> and <a href="https://fishingbooker.com/pt/charters/view/42848" target="_blank" rel="noopener">Debra Ann listing</a></li>
+      </ul>
+    </details>
+  </section>
+</main>
+</div>
+</div>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+<script>
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
