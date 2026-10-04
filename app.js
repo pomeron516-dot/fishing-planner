@@ -179,12 +179,12 @@ function status(){
 async function getJSON(u){const r=await fetch(u+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(u+' '+r.status);return r.json();}
 async function load(){
   try{
-    const d=await getJSON('data/live.json');
+    const d=await getJSON('live.json');
     Object.entries(d.tides||{}).forEach(([st,ev])=>E.setTides(st,ev));
     live.wx=d.wx||{};live.at=d.generatedAt;live.errors=d.errors||[];live.loaded=true;
   }catch(e){live.loaded=false;}
-  try{const r=await getJSON('data/reports.json');if(Array.isArray(r))extraReports=r;}catch(e){}
-  try{const r=await getJSON('data/inbox.json');if(Array.isArray(r))inbox=r;}catch(e){}
+  try{const r=await getJSON('reports.json');if(Array.isArray(r))extraReports=r;}catch(e){}
+  try{const r=await getJSON('inbox.json');if(Array.isArray(r))inbox=r;}catch(e){}
   status();renderInbox();$('wxnote').innerHTML=Object.keys(live.wx).length?'Forecasts below fill in automatically from the live marine forecast. Type a wind or seas value to override it for a day. Greyed numbers are the live values.':'No live forecast is loaded. Look up the <a href="https://www.weather.gov/marine/" target="_blank" rel="noopener">marine forecast</a> and enter wind in mph and seas in feet. Days left blank get a neutral weather score.';
   $('wxrows').dataset.k='';run();
 }

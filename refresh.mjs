@@ -2,7 +2,7 @@
 // Runs on GitHub Actions (Node 20+). Every lookup fails on its own, so one bad source never blanks the rest.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 
-const OUT = new URL('../data/', import.meta.url);
+const OUT = new URL('./', import.meta.url);
 const errors = [];
 
 const STATIONS = {
